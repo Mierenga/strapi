@@ -493,6 +493,60 @@ module.exports = {
       );
     }
 
+    if (!params.handle || typeof params.handle !== 'string') {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'Auth.form.error.handle.invalid',
+          message: 'Please provide a user handle.',
+        })
+      );
+    }
+
+    if (params.handle.length > 64) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'Auth.form.error.handle.invalid',
+          message: 'That handle is too long.',
+        })
+      );
+    }
+
+    if (!/^[a-z0-9-]+$/.test(params.handle)) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'Auth.form.error.handle.invalid',
+          message: 'Sorry, that handle is not valid.',
+        })
+      );
+    }
+
+    if (!/^[a-z0-9-]+$/.test(params.handle)) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'Auth.form.error.handle.invalid',
+          message: 'Sorry, that handle is not valid.',
+        })
+      );
+    }
+
+    const userWithSameHandle = await strapi.query('user', 'users-permissions').findOne({
+      handle: params.handle,
+    });
+
+    if (userWithSameHandle) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'Auth.form.error.handle.taken',
+          message: 'That handle is already taken.',
+        })
+      );
+    }
+
     try {
       if (!settings.email_confirmation) {
         params.confirmed = true;
